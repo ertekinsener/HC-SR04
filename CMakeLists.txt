@@ -14,7 +14,7 @@ set(CMSIS_COMP_LIST STM32F401RE)
 
 find_package(CMSIS COMPONENTS "${CMSIS_COMP_LIST}" REQUIRED)
 find_package(HAL COMPONENTS "${HAL_COMP_LIST}" REQUIRED)
-find_package(FreeRTOS COMPONENTS ARM_CM4 STM32F401RE REQUIRED)
+find_package(FreeRTOS COMPONENTS ARM_CM4F STM32F401RE REQUIRED)
 add_executable(${PROJECT_NAME})
 stm32_add_linker_script(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/linker_scripts/STM32F401XX_FLASH.ld)
 target_compile_definitions(${PROJECT_NAME} PUBLIC
@@ -72,8 +72,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     HAL::STM32::F4::LL_UTILS
     HAL::STM32::F4::LL_TIM
     CMSIS::STM32::F401RE
-    # FreeRTOS::STM32::F0::ARM_CM0
-    # FreeRTOS::STM32::F0::Heap::4
+    # FreeRTOS::STM32::F4::ARM_CM4F
+    # FreeRTOS::STM32::F4::Heap::4
     STM32::Nano
 )
 
