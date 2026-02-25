@@ -14,7 +14,7 @@ set(CMSIS_COMP_LIST STM32F401RE)
 
 find_package(CMSIS COMPONENTS "${CMSIS_COMP_LIST}" REQUIRED)
 find_package(HAL COMPONENTS "${HAL_COMP_LIST}" REQUIRED)
-find_package(FreeRTOS COMPONENTS ARM_CM4F STM32F401RE REQUIRED)
+# find_package(FreeRTOS COMPONENTS ARM_CM4F STM32F401RE REQUIRED)
 add_executable(${PROJECT_NAME})
 stm32_add_linker_script(${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/linker_scripts/STM32F401XX_FLASH.ld)
 target_compile_definitions(${PROJECT_NAME} PUBLIC
@@ -33,14 +33,14 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     STM32F401xE
 )
 
-# file(GLOB CORE_SRC_FILES "${PROJECT_SOURCE_DIR}/Core/Src/*.c" "${PROJECT_SOURCE_DIR}/Core/Src/*.cc" "${PROJECT_SOURCE_DIR}/Core/Src/*.cpp")
+file(GLOB CORE_SRC_FILES "${PROJECT_SOURCE_DIR}/Core/Src/*.c" "${PROJECT_SOURCE_DIR}/Core/Src/*.cc" "${PROJECT_SOURCE_DIR}/Core/Src/*.cpp")
 # file(GLOB SEGGER_SYSTEMVIEW_SRC_FILES "${PROJECT_SOURCE_DIR}/segger/SystemView/Sample/FreeRTOSV10/Config/Cortex-M/*.c" "${PROJECT_SOURCE_DIR}/segger/SystemView/Sample/FreeRTOSV10/*.c" "${PROJECT_SOURCE_DIR}/segger/SystemView/SYSVIEW/*.c")
 # file(GLOB SEGGER_RTT_SRC_FILES "${PROJECT_SOURCE_DIR}/segger/RTT/RTT/*.c")
-# target_sources(${PROJECT_NAME} PRIVATE
-#     ${CORE_SRC_FILES}
-#     ${SEGGER_SYSTEMVIEW_SRC_FILES}
-#     ${SEGGER_RTT_SRC_FILES}
-# )
+target_sources(${PROJECT_NAME} PRIVATE
+    ${CORE_SRC_FILES}
+    # ${SEGGER_SYSTEMVIEW_SRC_FILES}
+    # ${SEGGER_RTT_SRC_FILES}
+)
 
 # Enable link-time optimization and size optimization
 # target_compile_options(${PROJECT_NAME} PRIVATE -Og -g3)
@@ -54,17 +54,17 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -fno-threadsafe-statics # Removes mutex overhead for static local variables
     >
 )
-# target_include_directories(${PROJECT_NAME} PRIVATE
-#     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
-#     ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/Config
-#     ${CMAKE_CURRENT_SOURCE_DIR}/segger/RTT/Config
-#     ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/Sample/FreeRTOSV10
-#     ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/SEGGER
-#     ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/SEGGER
-#     ${CMAKE_CURRENT_SOURCE_DIR}/segger/RTT/RTT
-#     ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/SYSVIEW
+target_include_directories(${PROJECT_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
+    # ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/Config
+    # ${CMAKE_CURRENT_SOURCE_DIR}/segger/RTT/Config
+    # ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/Sample/FreeRTOSV10
+    # ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/SEGGER
+    # ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/SEGGER
+    # ${CMAKE_CURRENT_SOURCE_DIR}/segger/RTT/RTT
+    # ${CMAKE_CURRENT_SOURCE_DIR}/segger/SystemView/SYSVIEW
 
-# )
+)
 
 # set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -Wl,-Map=${CMAKE_PROJECT_NAME}.map")
 
