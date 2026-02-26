@@ -14,7 +14,7 @@ void Stm32DistanceMeterTimerStrategy::InitializeHardware() {
   echo_gpio_init_struct_.Speed = LL_GPIO_SPEED_FREQ_LOW;
   echo_gpio_init_struct_.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
   echo_gpio_init_struct_.Pull = LL_GPIO_PULL_NO;
-  echo_gpio_init_struct_.Alternate = LL_GPIO_AF_1;
+  echo_gpio_init_struct_.Alternate = LL_GPIO_AF_2;
   LL_GPIO_Init(echo_gpio_port_, &echo_gpio_init_struct_);
 
   trig_gpio_init_struct_.Pin = LL_GPIO_PIN_7;
@@ -22,18 +22,18 @@ void Stm32DistanceMeterTimerStrategy::InitializeHardware() {
   trig_gpio_init_struct_.Speed = LL_GPIO_SPEED_FREQ_LOW;
   trig_gpio_init_struct_.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
   trig_gpio_init_struct_.Pull = LL_GPIO_PULL_NO;
-  trig_gpio_init_struct_.Alternate = LL_GPIO_AF_1;
+  trig_gpio_init_struct_.Alternate = LL_GPIO_AF_2;
   LL_GPIO_Init(trig_gpio_port_, &trig_gpio_init_struct_);
 
-  tim_init_struct_.Prescaler = 47;
+  tim_init_struct_.Prescaler = 83;
   tim_init_struct_.CounterMode = LL_TIM_COUNTERMODE_UP;
-  tim_init_struct_.Autoreload = 65535;
+  tim_init_struct_.Autoreload = pulse_width_us_ + 10;
   tim_init_struct_.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
   LL_TIM_Init(timer_instance_, &tim_init_struct_);
   LL_TIM_SetOnePulseMode(timer_instance_, LL_TIM_ONEPULSEMODE_SINGLE);
   LL_TIM_SetTriggerOutput(timer_instance_, LL_TIM_TRGO_RESET);
   LL_TIM_DisableMasterSlaveMode(timer_instance_);
-  LL_TIM_EnableARRPreload(timer_instance_);
+  LL_TIM_DisableARRPreload(timer_instance_);
   tim_oc_init_struct_.OCMode = LL_TIM_OCMODE_INACTIVE;
   tim_oc_init_struct_.OCState = LL_TIM_OCSTATE_ENABLE;
   tim_oc_init_struct_.OCNState = LL_TIM_OCSTATE_DISABLE;
