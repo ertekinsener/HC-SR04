@@ -1,0 +1,38 @@
+@startuml
+hide empty description
+skinparam state {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+}
+
+state UNINITIALIZED
+state READY
+state SENDING_TRIGGER
+
+state ECHO_PROCESSING {
+    state WAITING_FOR_RISING_EDGE
+    state WAITING_FOR_FALLING_EDGE
+    
+    [*] --> WAITING_FOR_RISING_EDGE
+    WAITING_FOR_RISING_EDGE --> WAITING_FOR_FALLING_EDGE : IC Rising Edge Interrupt
+    WAITING_FOR_FALLING_EDGE --> [*] : IC Falling Edge Interrupt
+}
+
+state DATA_READY
+
+[*] --> UNINITIALIZED
+
+UNINITIALIZED --> READY : Initialize()
+
+READY --> SENDING_TRIGGER : StartMeasurement()
+
+SENDING_TRIGGER --> ECHO_PROCESSING : OC Interrupt [CNT == CCRx]
+
+' The composite state finishes successfully when it reaches its internal [*]
+ECHO_PROCESSING --> DATA_READY : [Echo Complete]
+
+' A global timeout for the entire composite state
+ECHO_PROCESSING --> READY : Timeout (Sensor Error)
+
+DATA_READY --> READY : GetMeasurement()
+@enduml
