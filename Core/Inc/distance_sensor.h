@@ -52,17 +52,17 @@ class DistanceSensor : public DistanceMeterIsrObserverInterface {
   void OnTimerInputCaptureInterrupt() override {
     if (current_state_ == State::kWaitingForRisingEdge) {
       hw_strategy_.ClearCounter();
-      capture_start_ = hw_strategy_.GetCapturedValue();
+      // capture_start_ = hw_strategy_.GetCapturedValue();
       hw_strategy_.ConfigureInputCaptureForFallingEdge();
       current_state_ = State::kWaitingForFallingEdge;
     } else if (current_state_ == State::kWaitingForFallingEdge) {
-      uint32_t capture_end = hw_strategy_.GetCapturedValue();
-
-      if (capture_end >= capture_start_) {
-        measurement_ticks_ = capture_end - capture_start_;
-      } else {
-        measurement_ticks_ = (0xFFFFFFFF - capture_start_ + capture_end + 1);
-      }
+      // uint32_t capture_end = hw_strategy_.GetCapturedValue();
+      measurement_ticks_ = hw_strategy_.GetCapturedValue();
+      // if (capture_end >= capture_start_) {
+      //   measurement_ticks_ = capture_end - capture_start_;
+      // } else {
+      //   measurement_ticks_ = (0xFFFFFFFF - capture_start_ + capture_end + 1);
+      // }
       hw_strategy_.StopTimer();
       current_state_ = State::kDataReady;
     }
@@ -80,9 +80,9 @@ class DistanceSensor : public DistanceMeterIsrObserverInterface {
     }
   }
 
-  bool GetMeasurement(uint32_t& out_ticks) {
+  bool GetMeasurement(uint32_t& distance_cm) {
     if (current_state_ == State::kDataReady) {
-      out_ticks = measurement_ticks_;
+      distance_cm = measurement_ticks_ / 58.0;  // convert microseconds to centimeters
       current_state_ = State::kReady;
       return true;
     }
