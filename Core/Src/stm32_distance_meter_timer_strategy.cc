@@ -34,6 +34,7 @@ void Stm32DistanceMeterTimerStrategy::InitializeHardware() {
   LL_TIM_SetTriggerOutput(timer_instance_, LL_TIM_TRGO_RESET);
   LL_TIM_DisableMasterSlaveMode(timer_instance_);
   LL_TIM_DisableARRPreload(timer_instance_);
+
   tim_oc_init_struct_.OCMode = LL_TIM_OCMODE_INACTIVE;
   tim_oc_init_struct_.OCState = LL_TIM_OCSTATE_ENABLE;
   tim_oc_init_struct_.OCNState = LL_TIM_OCSTATE_DISABLE;
@@ -62,16 +63,23 @@ void Stm32DistanceMeterTimerStrategy::InitializeHardware() {
 void Stm32DistanceMeterTimerStrategy::ConfigureTriggerPulse() {
   LL_TIM_DisableCounter(timer_instance_);
   LL_TIM_SetCounter(timer_instance_, 0);
-  // Force the output HIGH
-  LL_TIM_OC_SetMode(timer_instance_, LL_TIM_CHANNEL_CH2,
-                    LL_TIM_OCMODE_FORCED_ACTIVE);
-  // Return to normal inactive mode
-  LL_TIM_OC_SetMode(timer_instance_, LL_TIM_CHANNEL_CH2,
-                    LL_TIM_OCMODE_INACTIVE);
+
+  tim_oc_init_struct_.OCMode = LL_TIM_OCMODE_FORCED_ACTIVE;
+  LL_TIM_OC_Init(timer_instance_, LL_TIM_CHANNEL_CH2, &tim_oc_init_struct_);
+
+  tim_oc_init_struct_.OCMode = LL_TIM_OCMODE_INACTIVE;
+  LL_TIM_OC_Init(timer_instance_, LL_TIM_CHANNEL_CH2, &tim_oc_init_struct_);
+
   LL_TIM_DisableIT_CC1(timer_instance_);
   LL_TIM_CC_DisableChannel(timer_instance_, LL_TIM_CHANNEL_CH1);
+
+  LL_TIM_ClearFlag_CC2(timer_instance_);
   LL_TIM_EnableIT_CC2(timer_instance_);
+
+  LL_TIM_SetAutoReload(timer_instance_, pulse_width_us_ + 10);
   LL_TIM_SetOnePulseMode(timer_instance_, LL_TIM_ONEPULSEMODE_SINGLE);
+
+  LL_TIM_CC_EnableChannel(timer_instance_, LL_TIM_CHANNEL_CH2);
 }
 
 void Stm32DistanceMeterTimerStrategy::StartTriggerPulse() {
@@ -81,27 +89,27 @@ void Stm32DistanceMeterTimerStrategy::StartTriggerPulse() {
 void Stm32DistanceMeterTimerStrategy::ConfigureInputCaptureForRisingEdge() {
   LL_TIM_DisableCounter(timer_instance_);
   LL_TIM_SetCounter(timer_instance_, 0);
-  LL_TIM_IC_SetPolarity(timer_instance_, LL_TIM_CHANNEL_CH1,
-                        LL_TIM_IC_POLARITY_RISING);
-  LL_TIM_IC_SetActiveInput(timer_instance_, LL_TIM_CHANNEL_CH1,
-                           LL_TIM_ACTIVEINPUT_DIRECTTI);
-  // Re-initialize input capture with proper settings
-  // tim_ic_init_struct_.ICPolarity = LL_TIM_IC_POLARITY_RISING;
-  // LL_TIM_IC_Init(timer_instance_, LL_TIM_CHANNEL_CH1, &tim_ic_init_struct_);
+
+  tim_ic_init_struct_.ICPolarity = LL_TIM_IC_POLARITY_RISING;
+  LL_TIM_IC_Init(timer_instance_, LL_TIM_CHANNEL_CH1, &tim_ic_init_struct_);
+
   LL_TIM_DisableIT_CC2(timer_instance_);
-  // LL_TIM_CC_DisableChannel(timer_instance_, LL_TIM_CHANNEL_CH2);
-  LL_TIM_OC_SetMode(
-      timer_instance_, LL_TIM_CHANNEL_CH2,
-      LL_TIM_OCMODE_FROZEN);  // do not change output, since for input capture
-                              // timer will be used not in one pulse mode
+  tim_oc_init_struct_.OCMode = LL_TIM_OCMODE_FORCED_INACTIVE;
+  LL_TIM_OC_Init(timer_instance_, LL_TIM_CHANNEL_CH2, &tim_oc_init_struct_);
+
+  LL_TIM_ClearFlag_CC1(timer_instance_);
   LL_TIM_EnableIT_CC1(timer_instance_);
-  LL_TIM_CC_EnableChannel(timer_instance_, LL_TIM_CHANNEL_CH1);
+
+  LL_TIM_SetAutoReload(timer_instance_,
+                       0xFFFFFFFF);  // max period for input capture
   LL_TIM_SetOnePulseMode(timer_instance_, LL_TIM_ONEPULSEMODE_REPETITIVE);
+
+  LL_TIM_CC_EnableChannel(timer_instance_, LL_TIM_CHANNEL_CH1);
 }
 
 void Stm32DistanceMeterTimerStrategy::ConfigureInputCaptureForFallingEdge() {
-  LL_TIM_IC_SetPolarity(timer_instance_, LL_TIM_CHANNEL_CH1,
-                        LL_TIM_IC_POLARITY_FALLING);
+  tim_ic_init_struct_.ICPolarity = LL_TIM_IC_POLARITY_FALLING;
+  LL_TIM_IC_Init(timer_instance_, LL_TIM_CHANNEL_CH1, &tim_ic_init_struct_);
 }
 
 void Stm32DistanceMeterTimerStrategy::StartInputCapture() {
@@ -133,7 +141,7 @@ void Stm32DistanceMeterTimerStrategy::ClearUpdateFlag() {
 }
 
 uint32_t Stm32DistanceMeterTimerStrategy::GetUpdateEventPeriod() {
-  return tim_init_struct_.Autoreload;
+  return LL_TIM_GetAutoReload(timer_instance_) + 1;  // period is ARR + 1
 }
 
 uint32_t Stm32DistanceMeterTimerStrategy::GetCapturedValue() {
