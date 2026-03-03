@@ -24,6 +24,97 @@ The driver utilizes a decoupled architecture to separate high-level sensor logic
 | `Stm32DistanceMeterTimerStrategy` | Concrete implementation for STM32 using LL (Low-Layer) drivers. |
 | `DistanceMeterIsrObserverInterface` | Interface for receiving interrupt-driven events from hardware. |
 
+### Plantuml Diagram
+
+```plantuml
+@startuml
+skinparam style strictuml
+skinparam classAttributeIconSize 0
+
+interface DistanceMeterTimerStrategyInterface {
+    + {abstract} InitializeHardware()
+    + {abstract} ConfigureTriggerPulse()
+    + {abstract} StartTriggerPulse()
+    + {abstract} ConfigureInputCaptureForRisingEdge()
+    + {abstract} ConfigureInputCaptureForFallingEdge()
+    + {abstract} StartInputCapture()
+    + {abstract} IsOutputCompareInterrupt(): bool
+    + {abstract} IsInputCaptureInterrupt(): bool
+    + {abstract} IsUpdateInterrupt(): bool
+    + {abstract} ClearOutputCompareFlag()
+    + {abstract} ClearInputCaptureFlag()
+    + {abstract} ClearUpdateFlag()
+    + {abstract} GetUpdateEventPeriod(): uint32_t
+    + {abstract} GetCapturedValue(): uint32_t
+    + {abstract} ClearCounter()
+    + {abstract} StopTimer()
+    + {abstract} UsToTicks(us: uint32_t): uint32_t
+    + {abstract} ResetHardware()
+}
+
+interface DistanceMeterIsrObserverInterface {
+    + {abstract} OnTimerOutputCompareInterrupt()
+    + {abstract} OnTimerInputCaptureInterrupt()
+    + {abstract} OnTimerUpdateInterrupt()
+}
+
+class Stm32DistanceMeterTimerStrategy {
+    - timer_instance_: TIM_TypeDef*
+    - observer_: DistanceMeterIsrObserverInterface*
+    + {static} instance_: Stm32DistanceMeterTimerStrategy*
+    + {static} ISR()
+    + ProcessISR()
+    + AddObserver(observer: DistanceMeterIsrObserverInterface*)
+    + RemoveObserver()
+    .. Interface Overrides ..
+    + InitializeHardware()
+    + ConfigureTriggerPulse()
+    + StartTriggerPulse()
+    + ConfigureInputCaptureForRisingEdge()
+    + ConfigureInputCaptureForFallingEdge()
+    + StartInputCapture()
+    + GetCapturedValue(): uint32_t
+    + UsToTicks(us: uint32_t): uint32_t
+}
+
+class DistanceSensor {
+    - hw_strategy_: DistanceMeterTimerStrategyInterface&
+    - current_state_: State
+    - measurement_ticks_: uint32_t
+    - timeout_ticks_: uint32_t
+    + Initialize()
+    + StartMeasurement()
+    + GetMeasurement(distance_cm: uint32_t&): bool
+    .. Observer Overrides ..
+    + OnTimerOutputCompareInterrupt()
+    + OnTimerInputCaptureInterrupt()
+    + OnTimerUpdateInterrupt()
+}
+
+enum State <<enum>> {
+    kUninitialized
+    kReady
+    kSendingTrigger
+    kWaitingForRisingEdge
+    kWaitingForFallingEdge
+    kDataReady
+    kTimeout
+}
+
+' Relationships
+DistanceMeterTimerStrategyInterface <|.. Stm32DistanceMeterTimerStrategy
+DistanceMeterIsrObserverInterface <|.. DistanceSensor
+DistanceSensor o-- DistanceMeterTimerStrategyInterface : references
+Stm32DistanceMeterTimerStrategy --> DistanceMeterIsrObserverInterface : notifies
+DistanceSensor +-- State
+
+note right of Stm32DistanceMeterTimerStrategy
+  Uses STM32 LL (Low Layer) 
+  drivers for hardware access.
+end note
+@enduml
+```
+
 ## 🚀 Getting Started
 
 ### 1. Implement the Strategy
