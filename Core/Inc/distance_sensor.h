@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "distance_meter_isr_observer_interface.h"
-#include "DistanceMeterTimerStrategyInterface.h"
+#include "distance_meter_timer_strategy_interface.h"
 class DistanceSensor : public DistanceMeterIsrObserverInterface {
  public:
   // Flattens the composite state for efficient C++ execution

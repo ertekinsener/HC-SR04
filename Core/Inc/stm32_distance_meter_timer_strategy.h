@@ -1,6 +1,6 @@
 #ifndef CORE_INC_STM32_DISTANCE_METER_TIMER_STRATEGY_H_
 #define CORE_INC_STM32_DISTANCE_METER_TIMER_STRATEGY_H_
-#include "DistanceMeterTimerStrategyInterface.h"
+#include "distance_meter_timer_strategy_interface.h"
 #include "distance_meter_isr_observer_interface.h"
 #include "stm32f4xx_ll_bus.h"
 #include "stm32f4xx_ll_gpio.h"
