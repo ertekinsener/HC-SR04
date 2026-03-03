@@ -160,6 +160,10 @@ uint32_t Stm32DistanceMeterTimerStrategy::UsToTicks(uint32_t us) {
   return us;
 }  // us to ticks, since timer clock is 1MHz after prescaler
 
+uint32_t Stm32DistanceMeterTimerStrategy::TicksToUs(uint32_t ticks) {
+  return ticks;
+}
+
 void Stm32DistanceMeterTimerStrategy::ResetHardware() {
   LL_TIM_ClearFlag_CC1(timer_instance_);
   LL_TIM_ClearFlag_CC2(timer_instance_);

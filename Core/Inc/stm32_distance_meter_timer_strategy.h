@@ -33,6 +33,7 @@ class Stm32DistanceMeterTimerStrategy
   void ClearCounter() override;
   void StopTimer() override;
   uint32_t UsToTicks(uint32_t us) override;
+  uint32_t TicksToUs(uint32_t ticks) override;
   void ResetHardware() override;  // reset hardware and clear pending flags,
                                   // ready for next measurement
   void ProcessISR();

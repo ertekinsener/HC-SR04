@@ -20,13 +20,13 @@ public:
     virtual void ClearOutputCompareFlag() = 0;
     virtual void ClearInputCaptureFlag() = 0;
     virtual void ClearUpdateFlag() = 0;
-
     // Additional helper methods
     virtual uint32_t GetUpdateEventPeriod() = 0;
     virtual uint32_t GetCapturedValue() = 0;
     virtual void ClearCounter() = 0;
     virtual void StopTimer() = 0;
     virtual uint32_t UsToTicks(uint32_t us) = 0;
+    virtual uint32_t TicksToUs(uint32_t ticks) = 0;
     virtual void ResetHardware() = 0; // reset hardware and clear pending flags, ready for next measurement
 };
 
