@@ -53,6 +53,8 @@ target_compile_options(${PROJECT_NAME} PRIVATE
     -fno-use-cxa-atexit # Reduces overhead for static object destruction
     -fno-threadsafe-statics # Removes mutex overhead for static local variables
     >
+    -Wunused
+    -Wextra
 )
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
